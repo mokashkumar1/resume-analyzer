@@ -19,6 +19,7 @@ from resume_analyser import (
 
 ALLOWED_EXTENSIONS = {".pdf", ".docx"}
 MAX_CONTENT_LENGTH = 8 * 1024 * 1024
+MAX_RESUMES_PER_REQUEST = 3
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
@@ -87,6 +88,12 @@ def analyze():
         return render_template(
             "index.html",
             error="Please upload at least one PDF or DOCX resume."
+        )
+
+    if len(valid_files) > MAX_RESUMES_PER_REQUEST:
+        return render_template(
+            "index.html",
+            error=f"Please upload up to {MAX_RESUMES_PER_REQUEST} resumes at a time."
         )
 
     try:
