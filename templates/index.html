@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>AI Resume Analyzer</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+</head>
+
+<body>
+
+    <main class="container">
+
+        <section class="hero">
+
+            <p class="tag">
+                AI Recruitment Tool
+            </p>
+
+            <h1>
+                AI Resume Analyzer
+            </h1>
+
+            <p class="subtitle">
+                Compare multiple resumes with a job description
+                and rank candidates using AI.
+            </p>
+
+        </section>
+
+
+        <section class="card">
+
+            <form
+                id="analyzeForm"
+                action="/analyze"
+                method="POST"
+                enctype="multipart/form-data"
+            >
+
+                <div class="form-group">
+
+                    <label for="job_description">
+                        Job Description
+                    </label>
+
+                    <textarea
+                        id="job_description"
+                        name="job_description"
+                        rows="12"
+                        placeholder="Paste the complete job description here..."
+                        required
+                    ></textarea>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="resumes">
+                        Upload Resumes
+                    </label>
+
+                    <div class="upload-box">
+
+                        <input
+                            id="resumes"
+                            name="resumes"
+                            type="file"
+                            accept=".pdf,.docx"
+                            multiple
+                            required
+                        >
+
+                        <p>
+                            PDF and DOCX files supported
+                        </p>
+
+                    </div>
+
+                    <div id="fileList"></div>
+
+                </div>
+
+                <p class="disclaimer">
+                    Files are processed temporarily and are not intentionally stored by this app.
+                    Resume and job content is sent to the configured external AI provider, so use
+                    sample or non-sensitive documents for the public demo. AI scores are assistance
+                    only, not final hiring decisions.
+                </p>
+
+                <button
+                    id="analyzeButton"
+                    type="submit"
+                >
+                    Analyze Candidates
+                </button>
+
+            </form>
+
+        </section>
+
+
+        {% if error %}
+
+        <section class="error-box">
+
+            {{ error }}
+
+        </section>
+
+        {% endif %}
+
+
+        {% if results %}
+
+        <section class="results-section">
+
+            <div class="results-heading">
+
+                <div>
+
+                    <p class="tag">
+                        Analysis Complete
+                    </p>
+
+                    <h2>
+                        Candidate Rankings
+                    </h2>
+
+                </div>
+
+                {% if job_role %}
+
+                <span class="job-role">
+                    {{ job_role }}
+                </span>
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="candidate-list">
+
+                {% for candidate in results %}
+
+                <article class="candidate-card">
+
+                    <div class="candidate-top">
+
+                        <div>
+
+                            <span class="rank">
+                                #{{ loop.index }}
+                            </span>
+
+                            <h3>
+                                {{ candidate.name }}
+                            </h3>
+
+                            <p class="filename">
+                                {{ candidate.filename }}
+                            </p>
+
+                        </div>
+
+                        <div class="score">
+
+                            {{ candidate.score | round(1) }}%
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="progress">
+
+                        <div
+                            class="progress-bar"
+                            style="width: {{ candidate.score }}%"
+                        ></div>
+
+                    </div>
+
+
+                    <div class="details-grid">
+
+                        <div class="detail">
+
+                            <h4>
+                                Matching Skills
+                            </h4>
+
+                            {% set matching =
+                                candidate.details.get(
+                                    'matching_skills',
+                                    []
+                                )
+                            %}
+
+                            {% if matching %}
+
+                            <div class="skills">
+
+                                {% for skill in matching %}
+
+                                <span class="skill good">
+                                    {{ skill }}
+                                </span>
+
+                                {% endfor %}
+
+                            </div>
+
+                            {% else %}
+
+                            <p>
+                                No matching skills returned.
+                            </p>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <div class="detail">
+
+                            <h4>
+                                Missing Skills
+                            </h4>
+
+                            {% set missing =
+                                candidate.details.get(
+                                    'missing_skills',
+                                    []
+                                )
+                            %}
+
+                            {% if missing %}
+
+                            <div class="skills">
+
+                                {% for skill in missing %}
+
+                                <span class="skill missing">
+                                    {{ skill }}
+                                </span>
+
+                                {% endfor %}
+
+                            </div>
+
+                            {% else %}
+
+                            <p>
+                                No important missing skills.
+                            </p>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <div class="detail">
+
+                            <h4>
+                                Experience Requirement
+                            </h4>
+
+                            <p>
+
+                                {% if
+                                    candidate.details.get(
+                                        'experience_requirement_met'
+                                    )
+                                %}
+
+                                Met
+
+                                {% else %}
+
+                                Not met / Not available
+
+                                {% endif %}
+
+                            </p>
+
+                        </div>
+
+
+                        <div class="detail">
+
+                            <h4>
+                                Verdict
+                            </h4>
+
+                            <p>
+
+                                {{
+                                    candidate.details.get(
+                                        'verdict',
+                                        'No verdict returned.'
+                                    )
+                                }}
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+                {% endfor %}
+
+            </div>
+
+        </section>
+
+        {% endif %}
+
+
+    </main>
+
+
+    <script
+        src="{{ url_for('static', filename='script.js') }}"
+    ></script>
+
+</body>
+
+</html>
