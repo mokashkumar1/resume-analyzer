@@ -6,7 +6,7 @@ A Flask portfolio project that compares PDF/DOCX resumes against a job descripti
 
 Live demo: _coming after deployment_
 
-GitHub repository: _coming after publication_
+GitHub repository: https://github.com/mokashkumar1/resume-analyzer
 
 ## Features
 

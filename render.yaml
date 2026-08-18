@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: ai-resume-analyzer
+    runtime: python
+    plan: free
+    buildCommand: uv sync
+    startCommand: uv run gunicorn app:app --bind 0.0.0.0:$PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
